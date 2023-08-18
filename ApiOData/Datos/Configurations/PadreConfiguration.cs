@@ -13,8 +13,6 @@ namespace ApiOData.Datos.Configurations
     {
         public void Configure(EntityTypeBuilder<Padre> entity)
         {
-            entity.Property(e => e.Id).ValueGeneratedNever();
-
             entity.Property(e => e.Ocupacion)
                 .HasMaxLength(50)
                 .IsUnicode(false);

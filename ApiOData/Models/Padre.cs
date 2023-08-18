@@ -12,7 +12,7 @@ namespace ApiOData.Models
         }
 
         public int Id { get; set; }
-        public string Ocupacion { get; set; }
+        public string? Ocupacion { get; set; }
         public int? IsWork { get; set; }
         public int IdPersona { get; set; }
 

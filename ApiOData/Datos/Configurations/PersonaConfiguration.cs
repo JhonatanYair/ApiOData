@@ -13,13 +13,13 @@ namespace ApiOData.Datos.Configurations
     {
         public void Configure(EntityTypeBuilder<Persona> entity)
         {
-            entity.Property(e => e.Id).ValueGeneratedNever();
-
             entity.Property(e => e.Apellido)
+                .IsRequired()
                 .HasMaxLength(50)
                 .IsUnicode(false);
 
             entity.Property(e => e.Nombre)
+                .IsRequired()
                 .HasMaxLength(50)
                 .IsUnicode(false);
 

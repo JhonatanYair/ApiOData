@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+
 using ApiOData.Datos;
 using ApiOData.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -9,34 +7,17 @@ using Microsoft.AspNetCore.OData.Routing.Controllers;
 
 namespace ApiOData.Controllers
 {
-    
     public class PersonaController : ODataController
     {
+
         private readonly PersonaDBContext _context;
 
-        public PersonaController(PersonaDBContext context)
+        public  PersonaController(PersonaDBContext context)
         {
             _context = context;
         }
 
-        //[HttpGet]
-        //[EnableQuery]
-        //public ActionResult<IEnumerable<Persona>> Get()
-        //{
-        //    try
-        //    {
-        //        var personas = _context.Persona;
-        //        return Ok(personas);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // Manejo de la excepción
-        //        Console.WriteLine($"Error al obtener personas: {ex.Message}");
-        //        return StatusCode(StatusCodes.Status500InternalServerError, "Error interno del servidor");
-        //    }
-        //}
-
-        [EnableQuery(MaxExpansionDepth = 4)]
+        [EnableQuery(MaxExpansionDepth = 5)]
         public IQueryable<Persona> Get(ODataQueryOptions<Persona> options)
         {
             if (options == null || options.Filter == null)
@@ -49,40 +30,54 @@ namespace ApiOData.Controllers
         }
 
         [HttpPost]
-        public ActionResult Post([FromBody] Persona persona)
+        public ActionResult Post([FromBody]  Persona  Persona)
         {
-            _context.Persona.Add(persona);
-
-            return Created(persona);
+           _context.Persona.Add( Persona);
+           _context.SaveChanges();
+           return Created( Persona);
         }
 
         [HttpPut]
         public ActionResult Put([FromRoute] int key, [FromBody] Persona updatedPersona)
         {
-            var persona = _context.Persona.SingleOrDefault(d => d.Id == key);
+            var Persona = _context.Persona.SingleOrDefault(d => d.Id == key);
 
-            if (persona == null)
+            if (Persona == null)
             {
                 return NotFound();
             }
 
-            persona.Apellido = updatedPersona.Apellido;
-            persona.Nombre = updatedPersona.Nombre;
-            persona.IdGenero = updatedPersona.IdGenero;
-            persona.Edad = updatedPersona.Edad;
+            // Obtener los campos de Persona usando reflexión
+            var campos = typeof(Persona).GetProperties();
+
+            foreach (var campo in campos)
+            {
+                // Ignorar campos "Id" o "Uuid"
+                if (campo.Name.Equals("Id", StringComparison.OrdinalIgnoreCase) ||
+                    campo.Name.Equals("Uuid", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                var valorActualizado = campo.GetValue(updatedPersona);
+                if (valorActualizado != null)
+                {
+                    campo.SetValue(Persona, valorActualizado);
+                }
+            }
 
             _context.SaveChanges();
 
-            return Updated(persona);
+            return Ok(Persona);
         }
-
+ 
         public ActionResult Delete([FromRoute] int key)
         {
-            var customer = _context.Persona.SingleOrDefault(d => d.Id == key);
+            var  Persona = _context.Persona.SingleOrDefault(d => d.Id == key);
 
-            if (customer != null)
+            if ( Persona != null)
             {
-                _context.Persona.Remove(customer);
+                _context.Persona.Remove(Persona);
             }
 
             _context.SaveChanges();
@@ -90,5 +85,6 @@ namespace ApiOData.Controllers
             return NoContent();
         }
 
-    }
+    }    
 }
+

@@ -1,4 +1,5 @@
-﻿using ApiOData.Datos;
+
+using ApiOData.Datos;
 using ApiOData.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
@@ -8,14 +9,15 @@ namespace ApiOData.Controllers
 {
     public class HijoController : ODataController
     {
+
         private readonly PersonaDBContext _context;
 
-        public HijoController(PersonaDBContext context)
+        public  HijoController(PersonaDBContext context)
         {
             _context = context;
         }
 
-        [EnableQuery]
+        [EnableQuery(MaxExpansionDepth = 5)]
         public IQueryable<Hijo> Get(ODataQueryOptions<Hijo> options)
         {
             if (options == null || options.Filter == null)
@@ -28,11 +30,11 @@ namespace ApiOData.Controllers
         }
 
         [HttpPost]
-        public ActionResult Post([FromBody] Hijo Hijo)
+        public ActionResult Post([FromBody]  Hijo  Hijo)
         {
-            _context.Hijo.Add(Hijo);
-
-            return Created(Hijo);
+           _context.Hijo.Add( Hijo);
+           _context.SaveChanges();
+           return Created( Hijo);
         }
 
         [HttpPut]
@@ -45,21 +47,37 @@ namespace ApiOData.Controllers
                 return NotFound();
             }
 
-            Hijo.Carrera = updatedHijo.Carrera;
-            Hijo.IdPersona = updatedHijo.IdPersona;
-            Hijo.IdPadre = updatedHijo.IdPadre;
+            // Obtener los campos de Hijo usando reflexión
+            var campos = typeof(Hijo).GetProperties();
+
+            foreach (var campo in campos)
+            {
+                // Ignorar campos "Id" o "Uuid"
+                if (campo.Name.Equals("Id", StringComparison.OrdinalIgnoreCase) ||
+                    campo.Name.Equals("Uuid", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                var valorActualizado = campo.GetValue(updatedHijo);
+                if (valorActualizado != null)
+                {
+                    campo.SetValue(Hijo, valorActualizado);
+                }
+            }
+
             _context.SaveChanges();
 
-            return Updated(Hijo);
+            return Ok(Hijo);
         }
-
+ 
         public ActionResult Delete([FromRoute] int key)
         {
-            var customer = _context.Hijo.SingleOrDefault(d => d.Id == key);
+            var  Hijo = _context.Hijo.SingleOrDefault(d => d.Id == key);
 
-            if (customer != null)
+            if ( Hijo != null)
             {
-                _context.Hijo.Remove(customer);
+                _context.Hijo.Remove(Hijo);
             }
 
             _context.SaveChanges();
@@ -67,5 +85,6 @@ namespace ApiOData.Controllers
             return NoContent();
         }
 
-    }
+    }    
 }
+

@@ -7,8 +7,8 @@ namespace ApiOData.Models
     public partial class Hijo
     {
         public int Id { get; set; }
-        public string Carrera { get; set; }
-        public int? IsStudy { get; set; }
+        public string? Carrera { get; set; }
+        public int IsStudy { get; set; }
         public int IdPersona { get; set; }
         public int IdPadre { get; set; }
 

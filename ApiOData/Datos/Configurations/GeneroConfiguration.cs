@@ -13,9 +13,8 @@ namespace ApiOData.Datos.Configurations
     {
         public void Configure(EntityTypeBuilder<Genero> entity)
         {
-            entity.Property(e => e.Id).ValueGeneratedNever();
-
             entity.Property(e => e.Genero1)
+                .IsRequired()
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("Genero");

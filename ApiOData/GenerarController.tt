@@ -1,0 +1,125 @@
+﻿<#@ template language="C#" hostspecific="True" #>
+<#@ import namespace="System.IO" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+
+<#
+    string folderPath = Path.Combine(Path.GetDirectoryName(Host.TemplateFile), "Models");
+    string outputFolder = Path.Combine(Path.GetDirectoryName(Host.TemplateFile), "Controllers");
+    //Directory.CreateDirectory(outputFolder); // Crear la carpeta para los archivos de salida
+
+    // Obtiene la lista de archivos en la carpeta
+    string[] files = Directory.GetFiles(folderPath);
+    //string palabraBuscada = "Context";
+
+    foreach (string file in files)
+    {
+
+        string className = Path.GetFileNameWithoutExtension(file);
+        //bool contienePalabra = className.IndexOf(palabraBuscada, StringComparison.OrdinalIgnoreCase) >= 0;
+
+        //if (contienePalabra)
+        //{
+            //continue; // Saltar la generación del archivo si contiene la palabra buscada
+        //}
+
+
+#>
+
+using ApiOData.Datos;
+using ApiOData.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
+using Microsoft.AspNetCore.OData.Routing.Controllers;
+
+namespace ApiOData.Controllers
+{
+    public class <#= className #>Controller : ODataController
+    {
+
+        private readonly PersonaDBContext _context;
+
+        public  <#= className #>Controller(PersonaDBContext context)
+        {
+            _context = context;
+        }
+
+        [EnableQuery(MaxExpansionDepth = 5)]
+        public IQueryable<<#= className #>> Get(ODataQueryOptions<<#= className #>> options)
+        {
+            if (options == null || options.Filter == null)
+            {
+                // Handle the case where options or Filter is null
+                return _context.<#= className #>.AsQueryable();
+            }
+            IQueryable results = options.Filter.ApplyTo(_context.<#= className #>.AsQueryable(), new ODataQuerySettings());
+            return results as IQueryable<<#= className #>>;
+        }
+
+        [HttpPost]
+        public ActionResult Post([FromBody]  <#= className #>  <#= className #>)
+        {
+           _context.<#= className #>.Add( <#= className #>);
+           _context.SaveChanges();
+           return Created( <#= className #>);
+        }
+
+        [HttpPut]
+        public ActionResult Put([FromRoute] int key, [FromBody] <#= className #> updated<#= className #>)
+        {
+            var <#= className #> = _context.<#= className #>.SingleOrDefault(d => d.Id == key);
+
+            if (<#= className #> == null)
+            {
+                return NotFound();
+            }
+
+            // Obtener los campos de <#= className #> usando reflexión
+            var campos = typeof(<#= className #>).GetProperties();
+
+            foreach (var campo in campos)
+            {
+                // Ignorar campos "Id" o "Uuid"
+                if (campo.Name.Equals("Id", StringComparison.OrdinalIgnoreCase) ||
+                    campo.Name.Equals("Uuid", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                var valorActualizado = campo.GetValue(updated<#= className #>);
+                if (valorActualizado != null)
+                {
+                    campo.SetValue(<#= className #>, valorActualizado);
+                }
+            }
+
+            _context.SaveChanges();
+
+            return Ok(<#= className #>);
+        }
+ 
+        public ActionResult Delete([FromRoute] int key)
+        {
+            var  <#= className #> = _context.<#= className #>.SingleOrDefault(d => d.Id == key);
+
+            if ( <#= className #> != null)
+            {
+                _context.<#= className #>.Remove(<#= className #>);
+            }
+
+            _context.SaveChanges();
+
+            return NoContent();
+        }
+
+    }    
+}
+
+<#
+    string outputPath = Path.Combine(outputFolder, $"{className}Controller.cs");
+    File.WriteAllText(outputPath, this.GenerationEnvironment.ToString());
+    this.GenerationEnvironment.Clear();
+#>
+<#
+    }
+#>

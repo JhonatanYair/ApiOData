@@ -47,8 +47,8 @@ public class Program
         builder.EntitySet<Hijo>("Hijo");
         builder.EntitySet<Padre>("Padre");
         builder.EntitySet<Genero>("Genero");
-        builder.EntityType<Hijo>();
-        builder.EntityType<Padre>();
+        //builder.EntityType<Hijo>();
+        //builder.EntityType<Padre>();
         return builder.GetEdmModel();
     }
 

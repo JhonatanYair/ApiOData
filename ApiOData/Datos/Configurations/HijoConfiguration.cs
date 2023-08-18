@@ -13,8 +13,6 @@ namespace ApiOData.Datos.Configurations
     {
         public void Configure(EntityTypeBuilder<Hijo> entity)
         {
-            entity.Property(e => e.Id).ValueGeneratedNever();
-
             entity.Property(e => e.Carrera)
                 .HasMaxLength(50)
                 .IsUnicode(false);

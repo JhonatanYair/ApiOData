@@ -16,7 +16,7 @@ namespace ApiOData.Models
         public string Nombre { get; set; }
         public string Apellido { get; set; }
         public int IdGenero { get; set; }
-        public int? Edad { get; set; }
+        public int Edad { get; set; }
 
         public virtual Genero IdGeneroNavigation { get; set; }
         [JsonIgnore]
